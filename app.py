@@ -1,154 +1,113 @@
 from flask import Flask, render_template, request, redirect, url_for, flash
-import sqlite3
+import sqlite3  # Built-in Python library for SQLite database
 
 app = Flask(__name__)
-app.secret_key = "super-secret-key"
+app.secret_key = 'your-secret-key-here'  # Required for flash messages
 
-DATABASE = "students.db"
+DATABASE = 'students.db'  # Database file name (will be created automatically)
 
 
-# ==============================
-# Database Connection
-# ==============================
+# =============================================================================
+# DATABASE HELPER FUNCTIONS
+# =============================================================================
+
 def get_db_connection():
-    conn = sqlite3.connect(DATABASE)
-    conn.row_factory = sqlite3.Row
+    """Create a connection to the database"""
+    conn = sqlite3.connect(DATABASE)  # Connect to database file
+    conn.row_factory = sqlite3.Row  # This allows accessing columns by name (like dict)
     return conn
 
 
-# ==============================
-# Create Table
-# ==============================
 def init_db():
+    """Create the table if it doesn't exist"""
     conn = get_db_connection()
-    conn.execute("""
+    conn.execute('''
         CREATE TABLE IF NOT EXISTS students (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL,
-            email TEXT NOT NULL UNIQUE,
+            email TEXT NOT NULL,
             course TEXT NOT NULL
         )
-    """)
-    conn.commit()
-    conn.close()
+    ''')  # SQL command to create table with 4 columns
+    conn.commit()  # Save changes to database
+    conn.close()  # Close connection
 
 
-# ==============================
-# Home Page (List + Search)
-# ==============================
-@app.route("/")
+# =============================================================================
+# ROUTES
+# =============================================================================
+
+@app.route('/')
 def index():
-    search = request.args.get("search")
-
-    conn = get_db_connection()
-
-    if search:
-        students = conn.execute(
-            "SELECT * FROM students WHERE name LIKE ?",
-            ("%" + search + "%",)
-        ).fetchall()
-    else:
-        students = conn.execute("SELECT * FROM students ORDER BY id DESC").fetchall()
-
-    conn.close()
-    return render_template("index.html", students=students, search=search)
+    """Home page - Display all students from database"""
+    try:
+        conn = get_db_connection()  # Step 1: Connect to database
+        students = conn.execute('SELECT * FROM students ORDER BY id DESC').fetchall()  # Step 2: Get all rows (newest first)
+        conn.close()  # Step 3: Close connection
+        return render_template('index.html', students=students)
+    except Exception as e:
+        flash(f'Error loading students: {str(e)}', 'error')
+        return render_template('index.html', students=[])
 
 
-# ==============================
-# Add Student
-# ==============================
-@app.route("/add", methods=["GET", "POST"])
-def add_student():
-    if request.method == "POST":
-        name = request.form["name"]
-        email = request.form["email"]
-        course = request.form["course"]
-
+@app.route('/add_sample')
+def add_sample_student():
+    """Add multiple sample students to database (for testing)"""
+    sample_students = [
+        ('John Doe', 'john@example.com', 'Python'),
+        ('Jane Smith', 'jane@example.com', 'JavaScript'),
+        ('Bob Johnson', 'bob@example.com', 'Java'),
+        ('Alice Williams', 'alice@example.com', 'Python'),
+        ('Charlie Brown', 'charlie@example.com', 'C++'),
+        ('Diana Prince', 'diana@example.com', 'Web Development')
+    ]
+    
+    try:
         conn = get_db_connection()
-
-        # Check duplicate email
-        existing = conn.execute(
-            "SELECT * FROM students WHERE email = ?",
-            (email,)
-        ).fetchone()
-
-        if existing:
-            conn.close()
-            flash("Email already exists!", "danger")
-            return redirect(url_for("add_student"))
-
-        conn.execute(
-            "INSERT INTO students (name, email, course) VALUES (?, ?, ?)",
-            (name, email, course)
-        )
-        conn.commit()
+        for name, email, course in sample_students:
+            conn.execute(
+                'INSERT INTO students (name, email, course) VALUES (?, ?, ?)',
+                (name, email, course)  # ? are placeholders (safe from SQL injection)
+            )
+        conn.commit()  # Don't forget to commit!
         conn.close()
+        flash(f'Successfully added {len(sample_students)} sample students!', 'success')
+    except Exception as e:
+        flash(f'Error adding students: {str(e)}', 'error')
+    
+    return redirect(url_for('index'))
 
-        flash("Student added successfully!", "success")
-        return redirect(url_for("index"))
 
-    return render_template("add.html")
-
-
-# ==============================
-# Edit Student
-# ==============================
-@app.route("/edit/<int:id>", methods=["GET", "POST"])
-def edit_student(id):
-    conn = get_db_connection()
-
-    if request.method == "POST":
-        name = request.form["name"]
-        email = request.form["email"]
-        course = request.form["course"]
-
-        # Check duplicate email for other users
-        existing = conn.execute(
-            "SELECT * FROM students WHERE email = ? AND id != ?",
-            (email, id)
-        ).fetchone()
-
-        if existing:
+@app.route('/add', methods=['GET', 'POST'])
+def add_student():
+    """Add a new student via form"""
+    if request.method == 'POST':
+        name = request.form.get('name', '').strip()
+        email = request.form.get('email', '').strip()
+        course = request.form.get('course', '').strip()
+        
+        # Validation
+        if not name or not email or not course:
+            flash('All fields are required!', 'error')
+            return render_template('add_student.html')
+        
+        try:
+            conn = get_db_connection()
+            conn.execute(
+                'INSERT INTO students (name, email, course) VALUES (?, ?, ?)',
+                (name, email, course)
+            )
+            conn.commit()
             conn.close()
-            flash("Email already used by another student!", "danger")
-            return redirect(url_for("edit_student", id=id))
-
-        conn.execute(
-            "UPDATE students SET name=?, email=?, course=? WHERE id=?",
-            (name, email, course, id)
-        )
-        conn.commit()
-        conn.close()
-
-        flash("Student updated successfully!", "success")
-        return redirect(url_for("index"))
-
-    student = conn.execute(
-        "SELECT * FROM students WHERE id=?",
-        (id,)
-    ).fetchone()
-
-    conn.close()
-    return render_template("edit.html", student=student)
+            flash(f'Student {name} added successfully!', 'success')
+            return redirect(url_for('index'))
+        except Exception as e:
+            flash(f'Error adding student: {str(e)}', 'error')
+    
+    return render_template('add_student.html')
 
 
-# ==============================
-# Delete Student
-# ==============================
-@app.route("/delete/<int:id>")
-def delete_student(id):
-    conn = get_db_connection()
-    conn.execute("DELETE FROM students WHERE id=?", (id,))
-    conn.commit()
-    conn.close()
-
-    flash("Student deleted!", "danger")
-    return redirect(url_for("index"))
-
-
-# ==============================
-# Run App
-# ==============================
-if __name__ == "__main__":
-    init_db()
+if __name__ == '__main__':
+    init_db()  # Create table when app starts
     app.run(debug=True)
+

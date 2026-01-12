@@ -1,69 +1,63 @@
-# Part 2: Full CRUD Operations with HTML Forms
+# Part 1: Basic Flask with SQLite Database
 
 ## One-Line Summary
-Full CRUD operations (Create, Read, Update, Delete) with HTML forms
+Basic Flask app with SQLite connection and one simple table (Create & Read)
 
 ## What You'll Learn
-- HTML forms with POST method
-- Getting form data with `request.form`
-- UPDATE and DELETE SQL commands
-- `redirect()` and `url_for()` functions
-- Flash messages for user feedback
+- How to connect Flask to SQLite database
+- Creating a database table with SQL
+- Reading data from database (SELECT)
+- Inserting data into database (INSERT)
 
 ## Prerequisites
-- Complete part-1 first
-- Understand basic database connection
+- Flask basics (routes, templates, render_template)
+- Completed flask-basics course
 
 ## How to Run
 ```bash
-cd part-2
+# Navigate to this folder
+cd part-1
+
+# Activate virtual environment
+# Windows:
+venv\Scripts\activate
+# Mac/Linux:
+source venv/bin/activate
+
+# Install Flask (if not installed)
+pip install flask
+
+# Run the app
 python app.py
 ```
-Open: http://localhost:5000
 
-## CRUD Operations Explained
-
-| Operation | HTTP Method | SQL Command | Route | Description |
-|-----------|-------------|-------------|-------|-------------|
-| **C**reate | POST | INSERT INTO | `/add` | Add new student |
-| **R**ead | GET | SELECT | `/` | Display all students |
-| **U**pdate | POST | UPDATE | `/edit/<id>` | Modify existing student |
-| **D**elete | GET | DELETE | `/delete/<id>` | Remove student |
+## Test It
+1. Open browser: http://localhost:5000
+2. You'll see empty student list
+3. Click "Add Sample Student" button
+4. See the student appear in the table!
 
 ## Key Files
 ```
-part-2/
-├── app.py              <- CRUD operations
+part-1/
+├── app.py              <- Main Flask app with database code
 ├── templates/
-│   ├── index.html      <- List all students with Edit/Delete buttons
-│   ├── add.html        <- Form to add new student
-│   └── edit.html       <- Form to edit existing student
-└── README.md
+│   └── index.html      <- Display students table
+├── students.db         <- Database file (created when you run app)
+└── README.md           <- You are here
 ```
 
-## New Concepts
-
-### 1. Form Handling
-```python
-@app.route('/add', methods=['GET', 'POST'])
-def add_student():
-    if request.method == 'POST':  # Form submitted
-        name = request.form['name']  # Get form data
-```
-
-### 2. Redirect After Action
-```python
-return redirect(url_for('index'))  # Go to home page
-```
-
-### 3. Flash Messages
-```python
-flash('Student added!', 'success')  # Show message once
-```
+## Key Concepts
+| Concept | Explanation |
+|---------|-------------|
+| `sqlite3.connect()` | Opens connection to database file |
+| `conn.execute()` | Runs SQL command |
+| `conn.commit()` | Saves changes to database |
+| `conn.close()` | Closes the connection |
+| `fetchall()` | Gets all rows from SELECT query |
 
 ## Exercise
-1. Add a "Search" feature to find students by name
-2. Add validation to check if email already exists before adding
+Try modifying `add_sample_student()` to add different students with different names!
 
 ## Next Step
-→ Go to **part-3** to learn Flask-SQLAlchemy ORM (cleaner database code!)
+→ Go to **part-2** to learn Update and Delete operations (full CRUD)
