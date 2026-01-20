@@ -1,0 +1,1175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Library Manager | Admin Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-color: #F7F8FA;
+            --card-bg: #FFFFFF;
+            --primary: #2563EB;
+            --primary-hover: #1D4ED8;
+            --text-primary: #111827;
+            --text-secondary: #6B7280;
+            --border-color: #E5E7EB;
+            --success: #16A34A;
+            --warning: #D97706;
+            --error: #DC2626;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --radius: 10px;
+            --font-main: 'Inter', sans-serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-main);
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Layout */
+        .app-container {
+            max-width: 1440px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+
+        /* Navigation */
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+            padding: 0 8px;
+        }
+
+        .navbar-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .navbar-brand h1 {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: -0.025em;
+        }
+
+        .navbar-brand i {
+            color: var(--primary);
+            font-size: 24px;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 24px;
+        }
+
+        .nav-link {
+            background: none;
+            border: none;
+            font-family: var(--font-main);
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            cursor: pointer;
+            padding: 8px 0;
+            position: relative;
+            transition: color 0.2s;
+        }
+
+        .nav-link:hover {
+            color: var(--text-primary);
+        }
+
+        .nav-link.active {
+            color: var(--primary);
+        }
+
+        .nav-link.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background-color: var(--primary);
+            border-radius: 2px;
+        }
+
+        /* KPI Cards */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .kpi-card {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            padding: 20px 24px;
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.2s;
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .kpi-label {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .kpi-value {
+            font-size: 28px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        /* Main Content Grid */
+        .content-grid {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 32px;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        @media (max-width: 1024px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Cards */
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid rgba(229, 231, 235, 0.5);
+            overflow: hidden;
+        }
+
+        .card-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-body {
+            padding: 24px;
+        }
+
+        /* Forms */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+        }
+
+        .form-control {
+            width: 100%;
+            height: 44px;
+            padding: 0 12px;
+            font-family: var(--font-main);
+            font-size: 14px;
+            color: var(--text-primary);
+            background: #FFFFFF;
+            border: 1px solid #D1D5DB;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        textarea.form-control {
+            height: auto;
+            min-height: 100px;
+            padding: 12px;
+            resize: vertical;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            height: 44px;
+            padding: 0 20px;
+            border-radius: 8px;
+            font-family: var(--font-main);
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            gap: 8px;
+        }
+
+        .btn-sm {
+            height: 32px;
+            padding: 0 12px;
+            font-size: 12px;
+            border-radius: 6px;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background-color: white;
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+        }
+
+        .btn-secondary:hover {
+            background-color: #F9FAFB;
+            border-color: #D1D5DB;
+        }
+
+        .btn-danger {
+            background-color: #FEE2E2;
+            color: var(--error);
+        }
+
+        .btn-danger:hover {
+            background-color: #FECACA;
+        }
+
+        .btn-icon {
+            width: 32px;
+            height: 32px;
+            padding: 0;
+            border-radius: 6px;
+            background: transparent;
+            color: var(--text-secondary);
+        }
+        
+        .btn-icon:hover {
+            background: #F3F4F6;
+            color: var(--primary);
+        }
+
+        .btn-block {
+            width: 100%;
+        }
+
+        /* Tables */
+        .table-responsive {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            text-align: left;
+            padding: 12px 24px;
+            background-color: #F9FAFB;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        td {
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 14px;
+            color: var(--text-primary);
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover td {
+            background-color: #F9FAFB;
+        }
+
+        /* Badges */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .badge-gray {
+            background-color: #F3F4F6;
+            color: var(--text-secondary);
+        }
+        
+        .badge-blue {
+            background-color: #DBEAFE;
+            color: var(--primary);
+        }
+
+        /* Messages */
+        .alert {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-top: 16px;
+            font-size: 13px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .alert-success {
+            background-color: #DCFCE7;
+            color: var(--success);
+        }
+
+        .alert-error {
+            background-color: #FEE2E2;
+            color: var(--error);
+        }
+        
+        .alert-info {
+            background-color: #DBEAFE;
+            color: var(--primary);
+        }
+
+        /* Utility */
+        .hidden { display: none; }
+        .text-right { text-align: right; }
+        .mt-4 { margin-top: 16px; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Pagination */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 24px;
+        }
+
+        .page-btn {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            background: white;
+            cursor: pointer;
+            font-size: 13px;
+            color: var(--text-secondary);
+            transition: all 0.2s;
+        }
+
+        .page-btn:hover:not(:disabled) {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .page-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .page-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background: #F3F4F6;
+        }
+
+        /* API Docs specific */
+        .api-method {
+            display: inline-block;
+            font-family: monospace;
+            font-size: 12px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            margin-right: 8px;
+        }
+        .method-get { background: #DCFCE7; color: var(--success); }
+        .method-post { background: #FEF3C7; color: var(--warning); }
+        .method-put { background: #DBEAFE; color: var(--primary); }
+        .method-delete { background: #FEE2E2; color: var(--error); }
+        
+        .endpoint-row {
+            padding: 16px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .endpoint-path {
+            font-family: monospace;
+            color: var(--text-primary);
+            background: #F3F4F6;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        /* Search Results */
+        .search-results table {
+            margin-top: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Navigation -->
+        <nav class="navbar">
+            <div class="navbar-brand">
+                <i class="fas fa-layer-group"></i>
+                <h1>LibAdmin</h1>
+            </div>
+            <div class="nav-tabs">
+                <button class="nav-link active" onclick="switchTab('books')">Books</button>
+                <button class="nav-link" onclick="switchTab('authors')">Authors</button>
+                <button class="nav-link" onclick="switchTab('search')">Search</button>
+                <button class="nav-link" onclick="switchTab('api')">API Reference</button>
+            </div>
+        </nav>
+
+        <!-- KPI Cards -->
+        <div class="kpi-grid">
+            <div class="kpi-card">
+                <span class="kpi-label">Total Books</span>
+                <span class="kpi-value" id="booksCount">0</span>
+            </div>
+            <div class="kpi-card">
+                <span class="kpi-label">Total Authors</span>
+                <span class="kpi-value" id="authorsCount">0</span>
+            </div>
+            <div class="kpi-card">
+                <span class="kpi-label">API Requests</span>
+                <span class="kpi-value" id="apiCalls">0</span>
+            </div>
+        </div>
+
+        <!-- Books Tab -->
+        <div id="books-tab" class="tab-content content-grid">
+            <!-- Left: Form -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Add New Book</h2>
+                </div>
+                <div class="card-body">
+                    <div class="form-group">
+                        <label>Title</label>
+                        <input type="text" id="bookTitle" class="form-control" placeholder="e.g. The Great Gatsby">
+                    </div>
+                    <div class="form-group">
+                        <label>Author Name</label>
+                        <input type="text" id="bookAuthor" class="form-control" placeholder="e.g. F. Scott Fitzgerald">
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Year</label>
+                            <input type="number" id="bookYear" class="form-control" placeholder="1925">
+                        </div>
+                        <div class="form-group">
+                            <label>ISBN</label>
+                            <input type="text" id="bookIsbn" class="form-control" placeholder="Optional">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Link Author (Optional)</label>
+                        <select id="bookAuthorId" class="form-control">
+                            <option value="">Select an author...</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-primary btn-block" onclick="createBook()">
+                        <i class="fas fa-plus"></i> Create Book
+                    </button>
+                    <div id="bookMessage"></div>
+                </div>
+            </div>
+
+            <!-- Right: Table -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Books Inventory</h2>
+                    <div style="display: flex; gap: 10px;">
+                        <select id="bookSort" class="form-control" style="width: auto; height: 32px; font-size: 12px;" onchange="loadBooks()">
+                            <option value="id">Sort: ID</option>
+                            <option value="title">Sort: Title</option>
+                            <option value="author">Sort: Author</option>
+                            <option value="year">Sort: Year</option>
+                        </select>
+                        <select id="bookOrder" class="form-control" style="width: auto; height: 32px; font-size: 12px;" onchange="loadBooks()">
+                            <option value="asc">Ascending</option>
+                            <option value="desc">Descending</option>
+                        </select>
+                        <button class="btn btn-secondary btn-sm" onclick="loadBooks()">
+                            <i class="fas fa-sync"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th width="60">ID</th>
+                                <th>Title</th>
+                                <th>Author</th>
+                                <th width="80">Year</th>
+                                <th width="120" class="text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="booksList">
+                            <!-- JS populates this -->
+                        </tbody>
+                    </table>
+                </div>
+                <div style="padding: 16px; border-top: 1px solid var(--border-color);">
+                    <div class="pagination" id="bookPagination"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Authors Tab -->
+        <div id="authors-tab" class="tab-content content-grid hidden">
+            <!-- Left: Form -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Add Author</h2>
+                </div>
+                <div class="card-body">
+                    <div class="form-group">
+                        <label>Full Name</label>
+                        <input type="text" id="authorName" class="form-control" placeholder="e.g. Jane Austen">
+                    </div>
+                    <div class="form-group">
+                        <label>City</label>
+                        <input type="text" id="authorCity" class="form-control" placeholder="e.g. Hampshire">
+                    </div>
+                    <div class="form-group">
+                        <label>Biography</label>
+                        <textarea id="authorBio" class="form-control" placeholder="Short bio..."></textarea>
+                    </div>
+                    <button class="btn btn-primary btn-block" onclick="createAuthor()">
+                        <i class="fas fa-user-plus"></i> Create Author
+                    </button>
+                    <div id="authorMessage"></div>
+                </div>
+            </div>
+
+            <!-- Right: Table -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Registered Authors</h2>
+                    <button class="btn btn-secondary btn-sm" onclick="loadAuthors()">
+                        <i class="fas fa-sync"></i>
+                    </button>
+                </div>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th width="60">ID</th>
+                                <th>Name</th>
+                                <th>City</th>
+                                <th>Books</th>
+                                <th width="140" class="text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="authorsList">
+                            <!-- JS populates this -->
+                        </tbody>
+                    </table>
+                </div>
+                <div style="padding: 16px; border-top: 1px solid var(--border-color);">
+                    <div class="pagination" id="authorPagination"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search Tab -->
+        <div id="search-tab" class="tab-content content-grid hidden" style="grid-template-columns: 1fr;">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Search Database</h2>
+                </div>
+                <div class="card-body">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 32px;">
+                        <!-- Book Search -->
+                        <div>
+                            <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 16px;">Find Books</h3>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <input type="text" id="searchTitle" class="form-control" placeholder="Title...">
+                                </div>
+                                <div class="form-group">
+                                    <input type="text" id="searchAuthor" class="form-control" placeholder="Author...">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <input type="number" id="searchYear" class="form-control" placeholder="Year...">
+                                </div>
+                                <div class="form-group">
+                                    <input type="number" id="searchAuthorId" class="form-control" placeholder="Author ID...">
+                                </div>
+                            </div>
+                            <button class="btn btn-primary" onclick="searchBooks()">Search Books</button>
+                            <div id="searchBookResults" class="search-results mt-4"></div>
+                        </div>
+
+                        <!-- Author Search -->
+                        <div style="border-left: 1px solid var(--border-color); padding-left: 32px;">
+                            <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 16px;">Find Authors</h3>
+                            <div class="form-group">
+                                <input type="text" id="searchAuthorName" class="form-control" placeholder="Name...">
+                            </div>
+                            <div class="form-group">
+                                <input type="text" id="searchAuthorCity" class="form-control" placeholder="City...">
+                            </div>
+                            <button class="btn btn-primary" onclick="searchAuthors()">Search Authors</button>
+                            <div id="searchAuthorResults" class="search-results mt-4"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- API Tab -->
+        <div id="api-tab" class="tab-content hidden">
+            <div class="card" style="max-width: 800px; margin: 0 auto;">
+                <div class="card-header">
+                    <h2 class="card-title">API Documentation</h2>
+                </div>
+                <div class="card-body" style="padding: 0;">
+                    <div class="endpoint-row">
+                        <span class="api-method method-get">GET</span>
+                        <span class="endpoint-path">/api/books</span>
+                        <span style="color: var(--text-secondary); font-size: 13px;">List all books (paginated)</span>
+                    </div>
+                    <div class="endpoint-row">
+                        <span class="api-method method-post">POST</span>
+                        <span class="endpoint-path">/api/books</span>
+                        <span style="color: var(--text-secondary); font-size: 13px;">Create new book</span>
+                    </div>
+                    <div class="endpoint-row">
+                        <span class="api-method method-get">GET</span>
+                        <span class="endpoint-path">/api/books/{id}</span>
+                        <span style="color: var(--text-secondary); font-size: 13px;">Get book details</span>
+                    </div>
+                    <div class="endpoint-row">
+                        <span class="api-method method-put">PUT</span>
+                        <span class="endpoint-path">/api/books/{id}</span>
+                        <span style="color: var(--text-secondary); font-size: 13px;">Update book</span>
+                    </div>
+                    <div class="endpoint-row">
+                        <span class="api-method method-delete">DELETE</span>
+                        <span class="endpoint-path">/api/books/{id}</span>
+                        <span style="color: var(--text-secondary); font-size: 13px;">Delete book</span>
+                    </div>
+                    <div class="endpoint-row">
+                        <span class="api-method method-get">GET</span>
+                        <span class="endpoint-path">/api/books/search</span>
+                        <span style="color: var(--text-secondary); font-size: 13px;">Search books</span>
+                    </div>
+                    
+                    <div class="endpoint-row">
+                        <span class="api-method method-get">GET</span>
+                        <span class="endpoint-path">/api/authors</span>
+                        <span style="color: var(--text-secondary); font-size: 13px;">List authors</span>
+                    </div>
+                    <div class="endpoint-row">
+                        <span class="api-method method-post">POST</span>
+                        <span class="endpoint-path">/api/authors</span>
+                        <span style="color: var(--text-secondary); font-size: 13px;">Create new author</span>
+                    </div>
+                    <div class="endpoint-row">
+                        <span class="api-method method-get">GET</span>
+                        <span class="endpoint-path">/api/authors/{id}</span>
+                        <span style="color: var(--text-secondary); font-size: 13px;">Get author details</span>
+                    </div>
+                    <div class="endpoint-row">
+                        <span class="api-method method-put">PUT</span>
+                        <span class="endpoint-path">/api/authors/{id}</span>
+                        <span style="color: var(--text-secondary); font-size: 13px;">Update author</span>
+                    </div>
+                    <div class="endpoint-row">
+                        <span class="api-method method-delete">DELETE</span>
+                        <span class="endpoint-path">/api/authors/{id}</span>
+                        <span style="color: var(--text-secondary); font-size: 13px;">Delete author</span>
+                    </div>
+                    <div class="endpoint-row">
+                        <span class="api-method method-get">GET</span>
+                        <span class="endpoint-path">/api/authors/search</span>
+                        <span style="color: var(--text-secondary); font-size: 13px;">Search authors</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script>
+        // ==========================================
+        //  STATE MANAGEMENT
+        // ==========================================
+        let currentBookPage = 1;
+        let currentAuthorPage = 1;
+        let apiCallCount = 0;
+
+        // ==========================================
+        //  UI INTERACTIONS
+        // ==========================================
+        function switchTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.add('hidden');
+            });
+            document.getElementById(`${tabName}-tab`).classList.remove('hidden');
+
+            // Update Nav
+            document.querySelectorAll('.nav-link').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.currentTarget.classList.add('active');
+
+            // Load data
+            if (tabName === 'books') loadBooks();
+            if (tabName === 'authors') loadAuthors();
+        }
+
+        function trackApiCall() {
+            apiCallCount++;
+            document.getElementById('apiCalls').textContent = apiCallCount;
+        }
+
+        function showMessage(elementId, message, type = 'success') {
+            const element = document.getElementById(elementId);
+            const className = type === 'success' ? 'alert-success' : (type === 'error' ? 'alert-error' : 'alert-info');
+            const icon = type === 'success' ? 'check-circle' : (type === 'error' ? 'exclamation-circle' : 'info-circle');
+            
+            element.innerHTML = `
+                <div class="alert ${className}">
+                    <i class="fas fa-${icon}"></i>
+                    ${message}
+                </div>
+            `;
+            setTimeout(() => {
+                element.innerHTML = '';
+            }, 5000);
+        }
+
+        // ==========================================
+        //  BOOKS LOGIC
+        // ==========================================
+        async function loadBooks(page = 1) {
+            currentBookPage = page;
+            const sort = document.getElementById('bookSort').value;
+            const order = document.getElementById('bookOrder').value;
+            const tbody = document.getElementById('booksList');
+            
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px; color:var(--text-secondary);">Loading...</td></tr>';
+
+            try {
+                const response = await fetch(`/api/books?page=${page}&per_page=6&sort=${sort}&order=${order}`);
+                trackApiCall();
+                const data = await response.json();
+
+                if (data.success) {
+                    document.getElementById('booksCount').textContent = data.total_items;
+                    
+                    if (data.books.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px;">No books found.</td></tr>';
+                    } else {
+                        tbody.innerHTML = data.books.map(book => `
+                            <tr>
+                                <td><span class="badge badge-gray">#${book.id}</span></td>
+                                <td style="font-weight:500;">${book.title}</td>
+                                <td>${book.author}</td>
+                                <td>${book.year || '-'}</td>
+                                <td class="text-right">
+                                    <button class="btn-icon" onclick="editBook(${book.id})" title="Edit"><i class="fas fa-edit"></i></button>
+                                    <button class="btn-icon" style="color:var(--error);" onclick="deleteBook(${book.id})" title="Delete"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                        `).join('');
+                    }
+                    renderPagination('bookPagination', data.page, data.total_pages, 'loadBooks');
+                    loadAuthorsForSelect();
+                }
+            } catch (error) {
+                tbody.innerHTML = `<tr><td colspan="5" style="color:var(--error);">Error: ${error.message}</td></tr>`;
+            }
+        }
+
+        async function createBook() {
+            const title = document.getElementById('bookTitle').value.trim();
+            const author = document.getElementById('bookAuthor').value.trim();
+            const year = document.getElementById('bookYear').value;
+            const isbn = document.getElementById('bookIsbn').value.trim();
+            const authorId = document.getElementById('bookAuthorId').value;
+
+            if (!title || !author) {
+                showMessage('bookMessage', 'Title and Author are required', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/books', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        title, author, year: year || null, isbn: isbn || null, author_id: authorId || null
+                    })
+                });
+                trackApiCall();
+                const data = await response.json();
+
+                if (data.success) {
+                    showMessage('bookMessage', 'Book added successfully', 'success');
+                    // Reset form
+                    ['bookTitle', 'bookAuthor', 'bookYear', 'bookIsbn', 'bookAuthorId'].forEach(id => document.getElementById(id).value = '');
+                    loadBooks(currentBookPage);
+                } else {
+                    showMessage('bookMessage', data.error, 'error');
+                }
+            } catch (error) {
+                showMessage('bookMessage', error.message, 'error');
+            }
+        }
+
+        async function editBook(id) {
+            // Simplified edit for demo - normally would open modal
+            const newTitle = prompt('Enter new title:');
+            if (newTitle === null) return; // Cancelled
+            
+            const updateData = {};
+            if (newTitle) updateData.title = newTitle;
+            
+            // Allow editing other fields via subsequent prompts or a real modal in prod
+            // For now, minimal implementation to satisfy existing logic pattern
+            
+            try {
+                const response = await fetch(`/api/books/${id}`, {
+                    method: 'PUT',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(updateData)
+                });
+                trackApiCall();
+                const data = await response.json();
+                if(data.success) loadBooks(currentBookPage);
+            } catch(e) { alert(e.message); }
+        }
+
+        async function deleteBook(id) {
+            if(!confirm('Delete this book?')) return;
+            try {
+                const response = await fetch(`/api/books/${id}`, { method: 'DELETE' });
+                trackApiCall();
+                if((await response.json()).success) {
+                    loadBooks(currentBookPage);
+                    showMessage('bookMessage', 'Book deleted', 'success');
+                }
+            } catch(e) { alert(e.message); }
+        }
+
+        // ==========================================
+        //  AUTHORS LOGIC
+        // ==========================================
+        async function loadAuthors(page = 1) {
+            currentAuthorPage = page;
+            const tbody = document.getElementById('authorsList');
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px; color:var(--text-secondary);">Loading...</td></tr>';
+
+            try {
+                const response = await fetch(`/api/authors?page=${page}&per_page=6`);
+                trackApiCall();
+                const data = await response.json();
+
+                if (data.success) {
+                    document.getElementById('authorsCount').textContent = data.total_items;
+                    
+                    if (data.authors.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px;">No authors found.</td></tr>';
+                    } else {
+                        tbody.innerHTML = data.authors.map(author => `
+                            <tr>
+                                <td><span class="badge badge-gray">#${author.id}</span></td>
+                                <td style="font-weight:500;">${author.name}</td>
+                                <td>${author.city || '-'}</td>
+                                <td><span class="badge badge-blue">${author.books_count} books</span></td>
+                                <td class="text-right">
+                                    <button class="btn-icon" onclick="viewAuthor(${author.id})" title="View"><i class="fas fa-eye"></i></button>
+                                    <button class="btn-icon" onclick="editAuthor(${author.id})" title="Edit"><i class="fas fa-edit"></i></button>
+                                    <button class="btn-icon" style="color:var(--error);" onclick="deleteAuthor(${author.id})" title="Delete"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                        `).join('');
+                    }
+                    renderPagination('authorPagination', data.page, data.total_pages, 'loadAuthors');
+                }
+            } catch (error) {
+                tbody.innerHTML = `<tr><td colspan="5" style="color:var(--error);">Error: ${error.message}</td></tr>`;
+            }
+        }
+
+        async function createAuthor() {
+            const name = document.getElementById('authorName').value.trim();
+            const city = document.getElementById('authorCity').value.trim();
+            const bio = document.getElementById('authorBio').value.trim();
+
+            if (!name) {
+                showMessage('authorMessage', 'Name is required', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/authors', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ name, city, bio })
+                });
+                trackApiCall();
+                const data = await response.json();
+
+                if (data.success) {
+                    showMessage('authorMessage', 'Author created', 'success');
+                    ['authorName', 'authorCity', 'authorBio'].forEach(id => document.getElementById(id).value = '');
+                    loadAuthors(currentAuthorPage);
+                    loadAuthorsForSelect();
+                } else {
+                    showMessage('authorMessage', data.error, 'error');
+                }
+            } catch (error) {
+                showMessage('authorMessage', error.message, 'error');
+            }
+        }
+
+        async function loadAuthorsForSelect() {
+            try {
+                const response = await fetch('/api/authors');
+                const data = await response.json();
+                if(data.success) {
+                    const select = document.getElementById('bookAuthorId');
+                    select.innerHTML = '<option value="">Select an author...</option>';
+                    data.authors.forEach(a => {
+                        const opt = document.createElement('option');
+                        opt.value = a.id;
+                        opt.textContent = `${a.name}`;
+                        select.appendChild(opt);
+                    });
+                }
+            } catch(e) { console.error(e); }
+        }
+
+        async function viewAuthor(id) {
+            try {
+                const response = await fetch(`/api/authors/${id}`);
+                const data = await response.json();
+                if(data.success) {
+                    const a = data.author;
+                    alert(`Author: ${a.name}\nCity: ${a.city || 'N/A'}\nBio: ${a.bio || 'N/A'}\nBooks: ${data.books.length}`);
+                }
+            } catch(e) { alert(e.message); }
+        }
+
+        async function editAuthor(id) {
+            const newName = prompt('Enter new name:');
+            if(!newName) return;
+            
+            try {
+                const response = await fetch(`/api/authors/${id}`, {
+                    method: 'PUT',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ name: newName })
+                });
+                trackApiCall();
+                if((await response.json()).success) loadAuthors(currentAuthorPage);
+            } catch(e) { alert(e.message); }
+        }
+
+        async function deleteAuthor(id) {
+            if(!confirm('Delete author?')) return;
+            try {
+                const response = await fetch(`/api/authors/${id}`, { method: 'DELETE' });
+                trackApiCall();
+                if((await response.json()).success) {
+                    loadAuthors(currentAuthorPage);
+                    showMessage('authorMessage', 'Author deleted', 'success');
+                }
+            } catch(e) { alert(e.message); }
+        }
+
+        // ==========================================
+        //  SEARCH LOGIC
+        // ==========================================
+        async function searchBooks() {
+            const params = new URLSearchParams();
+            const title = document.getElementById('searchTitle').value;
+            const author = document.getElementById('searchAuthor').value;
+            const year = document.getElementById('searchYear').value;
+            const authorId = document.getElementById('searchAuthorId').value;
+
+            if(title) params.append('q', title);
+            if(author) params.append('author', author);
+            if(year) params.append('year', year);
+            if(authorId) params.append('author_id', authorId);
+
+            if(!params.toString()) {
+                showMessage('searchBookResults', 'Enter search criteria', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/books/search?${params}`);
+                trackApiCall();
+                const data = await response.json();
+                const container = document.getElementById('searchBookResults');
+                
+                if(data.success) {
+                    let html = `<div class="alert alert-success">Found ${data.count} books</div>`;
+                    if(data.count > 0) {
+                        html += '<table><thead><tr><th>ID</th><th>Title</th><th>Author</th><th>Year</th></tr></thead><tbody>';
+                        data.books.forEach(b => {
+                            html += `<tr><td>${b.id}</td><td><b>${b.title}</b></td><td>${b.author}</td><td>${b.year || '-'}</td></tr>`;
+                        });
+                        html += '</tbody></table>';
+                    }
+                    container.innerHTML = html;
+                }
+            } catch(e) { showMessage('searchBookResults', e.message, 'error'); }
+        }
+
+        async function searchAuthors() {
+            const params = new URLSearchParams();
+            const name = document.getElementById('searchAuthorName').value;
+            const city = document.getElementById('searchAuthorCity').value;
+
+            if(name) params.append('name', name);
+            if(city) params.append('city', city);
+
+            if(!params.toString()) {
+                showMessage('searchAuthorResults', 'Enter search criteria', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/authors/search?${params}`);
+                trackApiCall();
+                const data = await response.json();
+                const container = document.getElementById('searchAuthorResults');
+                
+                if(data.success) {
+                    let html = `<div class="alert alert-success">Found ${data.count} authors</div>`;
+                    if(data.count > 0) {
+                        html += '<table><thead><tr><th>ID</th><th>Name</th><th>City</th><th>Books</th></tr></thead><tbody>';
+                        data.authors.forEach(a => {
+                            html += `<tr><td>${a.id}</td><td><b>${a.name}</b></td><td>${a.city || '-'}</td><td>${a.books_count}</td></tr>`;
+                        });
+                        html += '</tbody></table>';
+                    }
+                    container.innerHTML = html;
+                }
+            } catch(e) { showMessage('searchAuthorResults', e.message, 'error'); }
+        }
+
+        // ==========================================
+        //  PAGINATION
+        // ==========================================
+        function renderPagination(elementId, currentPage, totalPages, callbackName) {
+            const container = document.getElementById(elementId);
+            if (totalPages <= 1) {
+                container.innerHTML = '';
+                return;
+            }
+
+            let html = `
+                <button class="page-btn" ${currentPage === 1 ? 'disabled' : ''} onclick="${callbackName}(${currentPage - 1})">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+            `;
+
+            for (let i = 1; i <= totalPages; i++) {
+                // Simple pagination logic: show all for now, or limit if too many
+                if (totalPages > 7 && Math.abs(currentPage - i) > 2 && i !== 1 && i !== totalPages) continue;
+                 html += `<button class="page-btn ${i === currentPage ? 'active' : ''}" onclick="${callbackName}(${i})">${i}</button>`;
+            }
+
+            html += `
+                <button class="page-btn" ${currentPage === totalPages ? 'disabled' : ''} onclick="${callbackName}(${currentPage + 1})">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            `;
+
+            container.innerHTML = html;
+        }
+
+        // Init
+        document.addEventListener('DOMContentLoaded', () => {
+            loadBooks();
+            loadAuthors();
+        });
+    </script>
+</body>
+</html>
